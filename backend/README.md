@@ -40,6 +40,8 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_CALLBACK_URL=http://localhost:4000/auth/google/callback
 ```
 
+You can generate the JWT_SECRET on the following site: `https://jwtsecrets.com/`
+
 ---
 
 ## 🛠️ Prisma (SQLite)
