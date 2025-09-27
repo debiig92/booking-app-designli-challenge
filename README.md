@@ -57,6 +57,11 @@ npx prisma migrate dev --name init
 npm run start:dev
 ```
 
+``` bash
+# Run unit tests
+npm run test
+```
+
 #### 2. Frontend
 
 ``` bash
@@ -65,11 +70,6 @@ npm install
 
 # Start the Next.js dev server
 npm run dev
-```
-
-``` bash
-# Run unit tests
-npm run test
 ```
 
 ------------------------------------------------------------------------
