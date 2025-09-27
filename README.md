@@ -67,6 +67,11 @@ npm install
 npm run dev
 ```
 
+``` bash
+# Run unit tests
+npm run test
+```
+
 ------------------------------------------------------------------------
 
 ## ✅ Features
@@ -91,13 +96,6 @@ Please check Backend Readme file: `https://github.com/debiig92/booking-app-desig
 
 Please check Frontend Readme file:  `https://github.com/debiig92/booking-app-designli-challenge/blob/main/frontend/README.md`
 
-### Backend
-
-``` bash
-# Run unit tests
-npm run test
-
-------------------------------------------------------------------------
 
 ## 📁 Project Structure
 
