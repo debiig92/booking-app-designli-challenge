@@ -10,9 +10,14 @@ export class GoogleProfileStrategy extends PassportStrategy(Strategy, 'google-pr
     super({
       clientID: cfg.get<string>('GOOGLE_CLIENT_ID')!,
       clientSecret: cfg.get<string>('GOOGLE_CLIENT_SECRET')!,
-      callbackURL: cfg.get<string>('GOOGLE_CALLBACK_URL')!,
+      callbackURL: cfg.get<string>('GOOGLE_PROFILE_CALLBACK_URL')!,
       scope: ['openid', 'email', 'profile'],
+      
     });
+  }
+
+  public authorizationParams(_options: any): any {
+        return { access_type: 'offline', prompt: 'consent' };
   }
 
   async validate(accessToken: string, _refreshToken: string, profile: Profile, done: Function) {

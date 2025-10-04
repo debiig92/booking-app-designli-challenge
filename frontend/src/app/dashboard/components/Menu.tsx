@@ -18,6 +18,7 @@ const Menu = () => {
     useEffect(() => {
         if (!token) { window.location.href = '/'; return; }
         try {
+            /* eslint-disable @typescript-eslint/no-explicit-any */
             const payload: any = jwtDecode(token);
             setMe({ email: payload.email, name: payload.name });
         } catch { }

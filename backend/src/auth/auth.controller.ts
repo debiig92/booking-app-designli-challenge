@@ -10,11 +10,11 @@ export class AuthController {
 
   // ----- LOGIN (profile only) -----
   @Get('google')
-  @UseGuards(AuthGuard('google-profile'))
+  @UseGuards(AuthGuard('google'))
   async googleAuth() {}
 
   @Get('google/callback')
-  @UseGuards(AuthGuard('google-profile'))
+  @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: Request, @Res() res: Response) {
     const user = (req as any).user as { id: string; email: string; name?: string };
     const token = this.jwt.sign({ sub: user.id, email: user.email, name: user.name });

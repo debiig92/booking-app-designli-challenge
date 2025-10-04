@@ -11,8 +11,8 @@ export class GoogleCalendarStrategy extends PassportStrategy(Strategy, 'google-c
         super({
             clientID: cfg.get<string>('GOOGLE_CLIENT_ID')!,
             clientSecret: cfg.get<string>('GOOGLE_CLIENT_SECRET')!,
-            callbackURL: cfg.get<string>('GOOGLE_CALLBACK_URL')!.replace('/auth/google/callback', '/auth/google-calendar/callback'),
-            scope: ['https://www.googleapis.com/auth/calendar.readonly'],
+            callbackURL: cfg.get<string>('GOOGLE_CALENDAR_CALLBACK_URL')!.replace('/auth/google/callback', '/auth/google-calendar/callback'),
+            scope: ['https://www.googleapis.com/auth/calendar.readonly', 'openid', 'email', 'profile'],
             passReqToCallback: true,
         });
     }
@@ -25,6 +25,7 @@ export class GoogleCalendarStrategy extends PassportStrategy(Strategy, 'google-c
     async validate(req: any, accessToken: string, refreshToken: string, _profile: Profile, done: Function) {
         // We pass our app's JWT in the "state" query
         const stateToken = req.query?.state as string | undefined;
+        console.debug("stateToken value: " , stateToken)
         if (!stateToken) throw new UnauthorizedException('Missing state token');
 
         const payload = this.jwt.verify(stateToken);

@@ -26,6 +26,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
     try {
       await api.delete(`/bookings/${id}`);
       await getAllBookings();
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Failed to cancel booking.");
       setMsgType('error')
@@ -50,6 +51,7 @@ export function BookingProvider({ children }: { children: React.ReactNode }) {
       setMsg("Booking created!");
       setMsgType('success')
       await getAllBookings();
+      /* eslint-disable @typescript-eslint/no-explicit-any */
     } catch (e: any) {
       setMsg(e?.response?.data?.message ?? "Failed to create booking.");
       setMsgType('error')

@@ -24,6 +24,6 @@ import { GoogleCalendarStrategy } from './google.calendar.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [GoogleProfileStrategy, GoogleCalendarStrategy, JwtStrategy],
+  providers: [GoogleStrategy, JwtStrategy],
 })
 export class AuthModule {}
