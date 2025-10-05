@@ -1,12 +1,13 @@
 #!/usr/bin/env sh
 set -e
 
-echo "Waiting for Postgres to be ready..."
-# tiny wait loop (compose healthcheck should handle most of this)
-sleep 2
+# Wait for DB (requires postgresql-client installed in the image)
+until pg_isready -h db -p 5432 -U postgres -d bookingdb >/dev/null 2>&1; do
+  sleep 2
+done
 
-echo "Running Prisma migrations..."
+echo "Applying Prisma migrations..."
 npx prisma migrate deploy
 
-echo "Starting NestJS..."
+echo "Starting API..."
 node dist/main.js
