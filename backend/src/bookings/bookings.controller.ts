@@ -27,4 +27,9 @@ export class BookingsController {
   async remove(@Req() req: any, @Param('id') id: string) {
     return this.bookings.remove(req.user.userId, id);
   }
+
+  @Get('health-secure')
+  healthSecure() {
+    return { ok: true, secure: true };
+  }
 }
