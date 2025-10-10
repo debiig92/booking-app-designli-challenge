@@ -2,9 +2,10 @@ import { Body, Controller, Delete, Get, Param, Post, Query, Req, UseGuards } fro
 import { AuthGuard } from '@nestjs/passport';
 import { BookingsService } from './bookings.service';
 import { CreateBookingDto } from './dto/create-booking.dto';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('bookings')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(JwtAuthGuard)
 export class BookingsController {
   constructor(private readonly bookings: BookingsService) {}
 

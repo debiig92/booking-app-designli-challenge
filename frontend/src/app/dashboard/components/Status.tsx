@@ -1,21 +1,20 @@
 "use client"
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from '@/lib/api';
 
 const Status = () => {
 
     const [calendarConnected, setCalendarConnected] = useState<boolean>(false);
-    const token = useMemo(() => (typeof window !== 'undefined' ? localStorage.getItem('jwt') : null), []);
 
     useEffect(() => {
         checkCalendar();
     }, []);
 
     const connectCalendar = () => {
-        const backend = process.env.NEXT_PUBLIC_BACKEND_URL!;
+        const backend = process.env.NEXT_PUBLIC_API_BASE_URL;
         // State carries our JWT so backend knows who is connecting
-        window.location.href = `${backend}/auth/google-calendar?state=${encodeURIComponent(token as string)}`;
+        window.location.href = `/api/backend/auth/google-calendar`;
     };
 
     const checkCalendar = async () => {

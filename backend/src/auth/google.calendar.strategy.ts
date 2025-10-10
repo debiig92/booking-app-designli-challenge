@@ -7,35 +7,56 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class GoogleCalendarStrategy extends PassportStrategy(Strategy, 'google-calendar') {
-    constructor(cfg: ConfigService, private users: UsersService, private jwt: JwtService) {
-        super({
-            clientID: cfg.get<string>('GOOGLE_CLIENT_ID')!,
-            clientSecret: cfg.get<string>('GOOGLE_CLIENT_SECRET')!,
-            callbackURL: cfg.get<string>('GOOGLE_CALENDAR_CALLBACK_URL')!.replace('/auth/google/callback', '/auth/google-calendar/callback'),
-            scope: ['https://www.googleapis.com/auth/calendar.readonly', 'openid', 'email', 'profile'],
-            passReqToCallback: true,
-        });
-    }
+constructor(
+    cfg: ConfigService,
+    private readonly users: UsersService,
+    private readonly jwt: JwtService,
+  ) {
+    super({
+      clientID: cfg.get<string>('GOOGLE_CLIENT_ID')!,
+      clientSecret: cfg.get<string>('GOOGLE_CLIENT_SECRET')!,
+      callbackURL: cfg.get<string>('GOOGLE_CALENDAR_CALLBACK_URL')!,
+      scope: ['openid','email','profile','https://www.googleapis.com/auth/calendar'],
+      passReqToCallback: true,
+    });
+  }
 
     public authorizationParams(_options: any): any {
         return { access_type: 'offline', prompt: 'consent' };
     }
 
 
-    async validate(req: any, accessToken: string, refreshToken: string, _profile: Profile, done: Function) {
-        // We pass our app's JWT in the "state" query
-        const stateToken = req.query?.state as string | undefined;
-        console.debug("stateToken value: " , stateToken)
-        if (!stateToken) throw new UnauthorizedException('Missing state token');
+async validate(
+    req: any,
+    accessToken: string,
+    refreshToken: string | undefined,
+    params: any,
+    profile: Profile,
+  ) {
+    const state = req.query?.state as string | undefined;
+    if (!state) throw new UnauthorizedException('Missing state');
 
-        const payload = this.jwt.verify(stateToken);
-        const userId = payload?.sub as string | undefined;
-        if (!userId) throw new UnauthorizedException('Invalid state token');
-
-        // Persist tokens on the user
-        await this.users.updateTokens(userId, accessToken, refreshToken || undefined);
-
-        // This strategy is only for connecting calendar, not for logging in
-        done(null, { userId });
+    let uid: string;
+    try {
+      const decoded = this.jwt.verify<{ uid: string }>(state);
+      uid = decoded.uid; // <-- DB user id we signed earlier
+    } catch {
+      throw new UnauthorizedException('Invalid state');
     }
+
+    const expiry =
+      typeof params?.expires_in === 'number'
+        ? new Date(Date.now() + params.expires_in * 1000)
+        : undefined;
+
+    // Persist tokens for *this* DB user id
+    await this.users.updateTokens(uid, accessToken, refreshToken ?? undefined, expiry);
+
+    return {
+      userId: uid,
+      email: profile.emails?.[0]?.value,
+      provider: 'google',
+    };
+  }
+    
 }

@@ -1,13 +1,11 @@
 "use client";
 import Link from "next/link";
 import MenuItem from "./MenuItem";
-import { useEffect, useMemo, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { useEffect, useState } from "react";
 
 const Menu = () => {
 
     const [me, setMe] = useState<{ email: string; name?: string } | null>(null);
-    const token = useMemo(() => (typeof window !== 'undefined' ? localStorage.getItem('jwt') : null), []);
     const menuRoutes: MenuItems[] = [
         {
             id: 1,
@@ -16,11 +14,9 @@ const Menu = () => {
         }
     ]
     useEffect(() => {
-        if (!token) { window.location.href = '/'; return; }
         try {
             /* eslint-disable @typescript-eslint/no-explicit-any */
-            const payload: any = jwtDecode(token);
-            setMe({ email: payload.email, name: payload.name });
+            setMe({ email: '', name: '' });
         } catch { }
     }, []);
 
@@ -56,7 +52,7 @@ const Menu = () => {
                         </div>
                         <div className="flex flex-col">
                             <button
-                                onClick={() => { localStorage.removeItem('jwt'); window.location.href = '/'; }}
+                                onClick={() => { }}
                                 className="text-lg font-bold leading-5 text-white"
                             >
                                 Sign out

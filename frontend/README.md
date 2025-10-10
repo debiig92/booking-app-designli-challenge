@@ -70,3 +70,10 @@ src/
         └── hooks        # Needed Context for state management
     ├──lib              # Api calls, types
 ```
+
+## Auth0 Notes
+
+- Using **@auth0/nextjs-auth0** with App Router. The route handler is **nodejs** runtime (not edge) to ensure cookies/sessions work reliably.
+- Do not call `getAccessToken()` in client components. All browser requests go through `/api/backend/...` which attaches the token server-side.
+- Login URL: `/api/auth/login?returnTo=/dashboard`.
+- Callback page simply checks session and redirects, the SDK handles the OAuth callback.

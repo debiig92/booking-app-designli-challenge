@@ -1,57 +1,26 @@
 import { Module } from '@nestjs/common';
-/*import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersModule } from '../users/users.module';
+import { UsersModule } from '../users/users.module';   // <-- import UsersModule
 import { AuthController } from './auth.controller';
-import { GoogleStrategy } from './google.strategy';
-import { JwtStrategy } from './jwt.strategy';
-import { GoogleProfileStrategy } from './google.profile.strategy';
-import { GoogleCalendarStrategy } from './google.calendar.strategy'; */
 import { Auth0JwtStrategy } from './auth0.strategy';
-import { APP_GUARD, Reflector } from '@nestjs/core';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { IS_PUBLIC_KEY } from 'src/common/decorators/public.decorator';
+import { GoogleCalendarStrategy } from './google.calendar.strategy';
 
-/* Auth2 Implementation
 @Module({
   imports: [
-    UsersModule,
-    PassportModule,
+    ConfigModule,
+    PassportModule.register({ session: false }),
+    UsersModule, // <-- gives strategies access to UsersService
     JwtModule.registerAsync({
-      global: true,
-      imports: [ConfigModule],
-      useFactory: (cfg: ConfigService) => ({
-        secret: cfg.get('JWT_SECRET'),
-        signOptions: { expiresIn: '7d' },
-      }),
       inject: [ConfigService],
+      useFactory: (cfg: ConfigService) => ({
+        secret: cfg.get('JWT_STATE_SECRET') || cfg.get('JWT_SECRET'),
+        signOptions: { expiresIn: '10m' }, // for OAuth state
+      }),
     }),
   ],
   controllers: [AuthController],
-  providers: [GoogleStrategy, JwtStrategy],
-})*/
-
-@Module({
-  providers: [
-    Auth0JwtStrategy,
-    {
-      provide: APP_GUARD,
-      useFactory: (reflector: Reflector) => {
-        class GlobalJwtGuard extends JwtAuthGuard {
-          canActivate(context) {
-            const isPublic = reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
-              context.getHandler(),
-              context.getClass(),
-            ]);
-            if (isPublic) return true;
-            return super.canActivate(context) as any;
-          }
-        }
-        return new GlobalJwtGuard();
-      },
-      inject: [Reflector],
-    },
-  ],
+  providers: [Auth0JwtStrategy, GoogleCalendarStrategy],
 })
 export class AuthModule {}

@@ -1,38 +1,48 @@
-import { Controller, Get, Req, Res, UseGuards, Headers } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import type { Response } from 'express';
+import { JwtAuthGuard } from './jwt-auth.guard';
+import { GoogleCalendarAuthGuard } from './google-calendar.guard';
 import { JwtService } from '@nestjs/jwt';
-import type { Request, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
+import { Public } from './public.decorator';
+import { UsersService } from '../users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private jwt: JwtService, private cfg: ConfigService) {}
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly users: UsersService,         // <-- ensure UsersModule exports UsersService
+  ) {}
 
-  // ----- LOGIN (profile only) -----
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {}
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req: Request, @Res() res: Response) {
-    const user = (req as any).user as { id: string; email: string; name?: string };
-    const token = this.jwt.sign({ sub: user.id, email: user.email, name: user.name });
-    const frontend = this.cfg.get('FRONTEND_URL');
-    return res.redirect(`${frontend}/auth/callback?token=${encodeURIComponent(token)}`);
-  }
-
-  // ----- CONNECT CALENDAR (requires existing JWT passed as `state`) -----
+  @UseGuards(JwtAuthGuard)
   @Get('google-calendar')
-  @UseGuards(AuthGuard('google-calendar'))
-  async connectCalendar(@Headers('authorization') _auth: string) {
-    // Passport will redirect to Google. We do not parse headers here—frontend sends ?state=<jwt>.
+  async connectGoogleCalendar(@Req() req: any, @Res() res: Response) {
+    // From Auth0JwtStrategy.validate()
+    const auth0Sub: string = req.user?.userId;    // e.g., "google-oauth2|123..."
+    const email: string | undefined = req.user?.email;
+    const name: string | undefined = req.user?.name;
+
+    // Make sure a local user row exists (create if missing) and get its DB id
+    const user = await this.users.findOrCreateFromAuth({ auth0Sub, email, name });
+
+    // Sign DB uid into state (short exp set via JwtModule)
+    const state = await this.jwt.signAsync({ uid: user?.id });
+
+    const search = new URLSearchParams({ state }).toString();
+    const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
+    // Send browser to the frontend proxy so redirects flow through it
+    return res.redirect(`${frontend}/api/backend/auth/google-calendar/consent?${search}`);
   }
 
+  @Public()
+  @UseGuards(GoogleCalendarAuthGuard)
+  @Get('google-calendar/consent')
+  async googleCalendarConsent() { return; }
+
+  @Public()
+  @UseGuards(GoogleCalendarAuthGuard)
   @Get('google-calendar/callback')
-  @UseGuards(AuthGuard('google-calendar'))
-  async connectCalendarCallback(@Req() req: Request, @Res() res: Response) {
-    const frontend = this.cfg.get('FRONTEND_URL');
+  async googleCalendarCallback(@Res() res: Response) {
+    const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
     return res.redirect(`${frontend}/dashboard?calendar=connected`);
   }
 }

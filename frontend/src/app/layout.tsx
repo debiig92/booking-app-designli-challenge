@@ -4,8 +4,8 @@ import './globals.css';
 export const metadata = { title: 'Bookings', description: 'Demo' };
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <UserProvider>   <body className="min-h-screen bg-gray-50 text-gray-900"><Suspense>{children}</Suspense></body> </UserProvider>
-    </html>
+    <html lang="en"><body className="min-h-screen bg-gray-50 text-gray-900">
+        <UserProvider><Suspense>{children}</Suspense>        </UserProvider>
+    </body></html>
   );
 }

@@ -4,7 +4,7 @@ import Login from "./components/Login";
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL!;
 export default function Home() {
   const login = () => {
-    window.location.href = `/api/auth/login`;
+    window.location.href = `/api/auth/login?returnTo=/dashboard`;
   };
   return (
     <Login>
